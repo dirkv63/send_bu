@@ -49,7 +49,7 @@ elif attcnt == 1:
     body = "Please find attached the single backup file updated since last run."
 else:
     subject = "{c} Backup Files".format(c=attcnt)
-    body = "Attached are the {c} backup files updated since last run."
+    body = "Attached are the {c} backup files updated since last run.".format(c=attcnt)
 
 gmail_user = cfg['Mail']['gmail_user']
 gmail_pwd = cfg['Mail']['gmail_pwd']
