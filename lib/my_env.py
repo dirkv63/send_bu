@@ -40,8 +40,7 @@ def init_env(projectname, filename):
     projectname = projectname
     modulename = get_modulename(filename)
     config = get_inifile(projectname)
-    my_log = init_loghandler(config, modulename)
-    my_log.info('Start Application')
+    init_loghandler(config, modulename)
     return config
 
 
