@@ -27,29 +27,29 @@ if my_env.is_prod(cfg):
 else:
     file_list = 'DevFiles'
 dbs = cfg[file_list]
-attcnt = 0
+att = []
 for k in dbs:
     fileToSend = cfg[file_list][k]
     with open(fileToSend, 'rb') as fp:
         fc = fp.read()
         if sa.file_update(k, fc):
-            attcnt += 1
+            att.append(k)
             attachment = MIMEBase('application', 'octet-stream')
             attachment.set_payload(fc)
             encoders.encode_base64(attachment)
             attachment.add_header("Content-Disposition", "attachment", filename=k)
             msg.attach(attachment)
-logging.debug("Found {c} attachments".format(c=attcnt))
+logging.debug("Found {c} attachments".format(c=len(att)))
 
-if attcnt == 0:
+if len(att) == 0:
     subject = "No Backup Files!"
     body = "No files were updated.\nThere are no backupfiles today!"
-elif attcnt == 1:
-    subject = "1 Backup File"
+elif len(att) == 1:
+    subject = "1 Backup File: " + att[0]
     body = "Please find attached the single backup file updated since last run."
 else:
-    subject = "{c} Backup Files".format(c=attcnt)
-    body = "Attached are the {c} backup files updated since last run.".format(c=attcnt)
+    subject = "{c} Backup Files: {a}".format(c=len(att), a=", ".join(att))
+    body = "Attached are the {c} backup files updated since last run.".format(c=len(att))
 
 gmail_user = cfg['Mail']['gmail_user']
 gmail_pwd = cfg['Mail']['gmail_pwd']
