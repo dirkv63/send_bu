@@ -5,6 +5,7 @@ Information from http://naelshiab.com/tutorial-send-email-python/
 
 
 import logging
+import platform
 import sys
 from lib import my_env
 from lib import info_layer
@@ -18,6 +19,7 @@ from email.mime.base import MIMEBase
 
 cfg = my_env.init_env("sendmail", __file__)
 logging.info("Start application")
+computername = platform.node()
 sa = info_layer.SqlAlConn(cfg)
 
 msg = MIMEMultipart()
@@ -50,6 +52,7 @@ elif len(att) == 1:
 else:
     subject = "{c} Backup Files: {a}".format(c=len(att), a=", ".join(att))
     body = "Attached are the {c} backup files updated since last run.".format(c=len(att))
+subject = "{c} - {s}".format(c=computername, s=subject)
 
 gmail_user = cfg['Mail']['gmail_user']
 gmail_pwd = cfg['Mail']['gmail_pwd']
