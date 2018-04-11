@@ -9,6 +9,7 @@ import platform
 import sys
 from lib import my_env
 from lib import info_layer
+from lib import ftp_handler
 # Import smtplib for the actual sending function
 import smtplib
 # Import the email modules we'll need
@@ -21,6 +22,7 @@ cfg = my_env.init_env("sendmail", __file__)
 logging.info("Start application")
 computername = platform.node()
 sa = info_layer.SqlAlConn(cfg)
+ftp = ftp_handler.ftp_handler(cfg)
 
 msg = MIMEMultipart()
 
@@ -35,12 +37,15 @@ for k in dbs:
     with open(fileToSend, 'rb') as fp:
         fc = fp.read()
         if sa.file_update(k, fc):
+            # Add file as an attachment
             att.append(k)
             attachment = MIMEBase('application', 'octet-stream')
             attachment.set_payload(fc)
             encoders.encode_base64(attachment)
             attachment.add_header("Content-Disposition", "attachment", filename=k)
             msg.attach(attachment)
+            # Send file to FTP Server
+            ftp.load_file(fileToSend, k)
 logging.debug("Found {c} attachments".format(c=len(att)))
 
 if len(att) == 0:
