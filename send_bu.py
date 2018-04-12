@@ -4,6 +4,7 @@ Information from http://naelshiab.com/tutorial-send-email-python/
 """
 
 
+import datetime
 import logging
 import platform
 import sys
@@ -45,7 +46,7 @@ for k in dbs:
             attachment.add_header("Content-Disposition", "attachment", filename=k)
             msg.attach(attachment)
             # Send file to FTP Server
-            ftp.load_file(fileToSend, k)
+            ftp.load_file(fileToSend, k + str(datetime.datetime.today().weekday()))
 logging.debug("Found {c} attachments".format(c=len(att)))
 
 if len(att) == 0:
