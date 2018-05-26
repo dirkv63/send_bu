@@ -15,9 +15,9 @@ from lib import ftp_handler
 import smtplib
 # Import the email modules we'll need
 from email.mime.multipart import MIMEMultipart
-from email import encoders
+# from email import encoders
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
+# from email.mime.base import MIMEBase
 
 cfg = my_env.init_env("sendmail", __file__)
 logging.info("Start application")
@@ -32,12 +32,14 @@ if my_env.is_prod(cfg):
 else:
     file_list = 'DevFiles'
 dbs = cfg[file_list]
-att = []
+# att = []
+files = []
 for k in dbs:
     fileToSend = cfg[file_list][k]
     with open(fileToSend, 'rb') as fp:
         fc = fp.read()
         if sa.file_update(k, fc):
+            """
             # Add file as an attachment
             att.append(k)
             attachment = MIMEBase('application', 'octet-stream')
@@ -45,19 +47,21 @@ for k in dbs:
             encoders.encode_base64(attachment)
             attachment.add_header("Content-Disposition", "attachment", filename=k)
             msg.attach(attachment)
+            """
+            files.append(k)
             # Send file to FTP Server
             ftp.load_file(fileToSend, k + str(datetime.datetime.today().weekday()))
-logging.debug("Found {c} attachments".format(c=len(att)))
+logging.debug("Found {c} attachments".format(c=len(files)))
 
-if len(att) == 0:
+if len(files) == 0:
     subject = "No Backup Files!"
     body = "No files were updated.\nThere are no backupfiles today!"
-elif len(att) == 1:
-    subject = "1 Backup File: " + att[0]
-    body = "Please find attached the single backup file updated since last run."
+elif len(files) == 1:
+    subject = "1 Backup File: " + files[0]
+    body = "One single backup file updated since last run."
 else:
-    subject = "{c} Backup Files: {a}".format(c=len(att), a=", ".join(att))
-    body = "Attached are the {c} backup files updated since last run.".format(c=len(att))
+    subject = "{c} Backup Files: {a}".format(c=len(files), a=", ".join(files))
+    body = "{c} backup files updated since last run.".format(c=len(files))
 subject = "{c} - {s}".format(c=computername, s=subject)
 
 gmail_user = cfg['Mail']['gmail_user']
