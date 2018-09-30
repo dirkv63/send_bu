@@ -84,7 +84,7 @@ class ftp_handler:
         try:
             f = open(file, mode='rb')
         except:
-            e = sys.exc_info()[0]
+            e = sys.exc_info()[1]
             log_msg = "Error to open file %s"
             logging.critical(log_msg, e)
             return
@@ -95,7 +95,7 @@ class ftp_handler:
         try:
             self.ftp_hdl.storbinary(stor_cmd, f)
         except:
-            e = sys.exc_info()[0]
+            e = sys.exc_info()[1]
             log_msg = "Error loading file: %s"
             logging.critical(log_msg, e)
             return
