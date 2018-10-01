@@ -74,7 +74,7 @@ class ftp_handler:
 
         :param fn: Name of the file on the remote server. If not specified, then same name as on the sending server.
 
-        :return:
+        :return: Result of the FTP command.
         """
         log_msg = "Moving file %s to FTP Server"
         logging.debug(log_msg, file)
@@ -85,49 +85,25 @@ class ftp_handler:
             f = open(file, mode='rb')
         except:
             e = sys.exc_info()[1]
-            log_msg = "Error to open file %s"
-            logging.critical(log_msg, e)
-            return
+            log_msg = "Error to open file {e}".format(e=e)
+            logging.critical(log_msg)
+            return log_msg
         if fn:
             stor_cmd = 'STOR ' + fn
         else:
-            stor_cmd = 'STOR' + filename
+            fn = filename
+            stor_cmd = 'STOR' + fn
         try:
             self.ftp_hdl.storbinary(stor_cmd, f)
         except:
             e = sys.exc_info()[1]
-            log_msg = "Error loading file: %s"
-            logging.critical(log_msg, e)
-            return
-        log_msg = "Looks like file %s is moved to FTP Server, close file now."
-        logging.debug(log_msg, file)
+            log_msg = "Error loading file: {e}".format(e=e)
+            logging.critical(log_msg)
+            return log_msg
+        log_msg = "Looks like file {f} is moved to FTP Server.".format(f=file)
+        logging.debug(log_msg)
+        rem_size = self.ftp_hdl.size(fn)
+        local_size = os.path.getsize(file)
+        log_msg += "\nRemote size: {r}, local size: {l}".format(r=rem_size, l=local_size)
         f.close()
-        return
-
-    def remove_file(self, file=None):
-        """
-        Remove file on mobielvlaanderen.be. Remove 'empty' identifier if it is still in the filename.
-
-        :param file: Filename of the file to be removed. Path can be part of the filename.
-
-        :return:
-        """
-        log_msg = "Removing file %s from FTP Server"
-        logging.debug(log_msg, file)
-        # Get Filename from file pointer
-        (filepath, filename) = os.path.split(file)
-        filename = re.sub('empty\.', '', filename)
-        log_msg = "First remove 'empty.' from filename, new filename: %s."
-        logging.debug(log_msg, filename)
-        # Remove the File
-        try:
-            self.ftp_hdl.delete(filename)
-        except:
-            e = sys.exc_info()[1]
-            ec = sys.exc_info()[0]
-            log_msg = "Error removing file: %s %s"
-            logging.error(log_msg, e, ec)
-        else:
-            log_msg = "Looks like file %s is removed from FTP Server"
-            logging.debug(log_msg, filename)
-        return
+        return log_msg
