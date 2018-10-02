@@ -104,6 +104,6 @@ class ftp_handler:
         logging.debug(log_msg)
         rem_size = self.ftp_hdl.size(fn)
         local_size = os.path.getsize(file)
-        log_msg += "\nRemote size: {r}, local size: {l}".format(r=rem_size, l=local_size)
+        log_msg += "\nRemote size: {r:,} bytes, local size: {l:,} bytes.".format(r=rem_size, l=local_size)
         f.close()
         return log_msg
