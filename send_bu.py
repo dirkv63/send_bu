@@ -51,6 +51,7 @@ for k in dbs:
                 res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
             except PermissionError:
                 res = "Permission denied on {fn}".format(fn=fileToSend)
+                logging.error(res)
             msg_arr.append(res)
 
 if len(files) == 0:
