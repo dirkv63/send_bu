@@ -42,12 +42,15 @@ for k in dbs:
             zipfn = "{fn}.zip".format(fn=fn.split(".")[0])
             zipffp = os.path.join(fp, zipfn)
             os.chdir(fp)
-            zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
-            zipf.write(fn)
-            zipf.close()
-            files.append(zipffp)
-            # Send file to FTP Server
-            res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
+            try:
+                zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
+                zipf.write(fn)
+                zipf.close()
+                files.append(zipffp)
+                # Send file to FTP Server
+                res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
+            except PermissionError:
+                res = "Permission denied on {fn}".format(fn=fileToSend)
             msg_arr.append(res)
 
 if len(files) == 0:
