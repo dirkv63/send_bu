@@ -6,7 +6,9 @@ Information from http://naelshiab.com/tutorial-send-email-python/
 
 import datetime
 import logging
+import os
 import platform
+import zipfile
 from lib import my_env
 from lib import info_layer
 from lib import ftp_handler
@@ -34,9 +36,18 @@ for k in dbs:
     with open(fileToSend, 'rb') as fp:
         fc = fp.read()
         if sa.file_update(k, fc):
-            files.append(k)
+            # zip file before sending
+            logging.debug(("Zip File {fn}".format(fn=fileToSend)))
+            (fp, fn) = os.path.split(fileToSend)
+            zipfn = "{fn}.zip".format(fn=fn.split(".")[0])
+            zipffp = os.path.join(fp, zipfn)
+            os.chdir(fp)
+            zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
+            zipf.write(fn)
+            zipf.close()
+            files.append(zipffp)
             # Send file to FTP Server
-            res = ftp.load_file(fileToSend, k + str(datetime.datetime.today().weekday()))
+            res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
             msg_arr.append(res)
 
 if len(files) == 0:
