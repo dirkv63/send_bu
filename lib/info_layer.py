@@ -25,6 +25,19 @@ class SqlAlConn:
         """
         self.sess = init_session(config, echo)
 
+    def file_remove(self, file_id):
+        """
+        This method will remove the file from the database. This is required when a file backup didn't succeed. By
+        removing the file from the database, the file will be flagged for load on the next run.
+
+        :param file_id: Unique identifier for the file, use filename.
+
+        :return:
+        """
+        self.sess.query(FileHash).filter_by(file_id=file_id).delete()
+        self.sess.commit()
+        return
+
     def file_update(self, file_id, fc):
         """
         This method will check if the file is updated since last run.

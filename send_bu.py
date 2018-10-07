@@ -52,6 +52,7 @@ for k in dbs:
             except PermissionError:
                 res = "Permission denied on {fn}".format(fn=fileToSend)
                 logging.error(res)
+                sa.file_remove(k)
             msg_arr.append(res)
 
 if len(files) == 0:
