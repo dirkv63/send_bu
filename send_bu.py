@@ -46,7 +46,7 @@ for k in dbs:
                 zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
                 zipf.write(fn)
                 zipf.close()
-                files.append(zipffp)
+                files.append(k)
                 # Send file to FTP Server
                 res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
             except PermissionError:
