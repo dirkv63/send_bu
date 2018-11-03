@@ -7,7 +7,7 @@ import time
 from lib.db_model import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.exc import *
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class SqlAlConn:
