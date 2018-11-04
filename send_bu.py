@@ -33,27 +33,32 @@ files = []
 msg_arr = []
 for k in dbs:
     fileToSend = cfg[file_list][k]
-    with open(fileToSend, 'rb') as fp:
-        fc = fp.read()
-        if sa.file_update(k, fc):
-            # zip file before sending
-            logging.debug(("Zip File {fn}".format(fn=fileToSend)))
-            (fp, fn) = os.path.split(fileToSend)
-            zipfn = "{fn}.zip".format(fn=fn.split(".")[0])
-            zipffp = os.path.join(fp, zipfn)
-            os.chdir(fp)
-            try:
-                zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
-                zipf.write(fn)
-                zipf.close()
-                files.append(k)
-                # Send file to FTP Server
-                res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
-            except PermissionError:
-                res = "Permission denied on {fn}".format(fn=fileToSend)
-                logging.error(res)
-                sa.file_remove(k)
-            msg_arr.append(res)
+    try:
+        with open(fileToSend, 'rb') as fp:
+            fc = fp.read()
+            if sa.file_update(k, fc):
+                # zip file before sending
+                logging.debug(("Zip File {fn}".format(fn=fileToSend)))
+                (fp, fn) = os.path.split(fileToSend)
+                zipfn = "{fn}.zip".format(fn=fn.split(".")[0])
+                zipffp = os.path.join(fp, zipfn)
+                os.chdir(fp)
+                try:
+                    zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
+                    zipf.write(fn)
+                    zipf.close()
+                    files.append(k)
+                    # Send file to FTP Server
+                    res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
+                except PermissionError:
+                    res = "Permission denied on {fn}".format(fn=fileToSend)
+                    logging.error(res)
+                    sa.file_remove(k)
+                msg_arr.append(res)
+    except FileNotFoundError:
+        logmsg = "Cannot find file {fts} for evaluation".format(fts=fileToSend)
+        msg_arr.append(logmsg)
+        logging.error(logmsg)
 
 if len(files) == 0:
     subject = "No Backup Files!"
