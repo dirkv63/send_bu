@@ -1,8 +1,5 @@
 import logging
-import os
 import requests
-import sys
-from ftplib import FTP
 
 
 class PcloudHandler:
@@ -31,19 +28,47 @@ class PcloudHandler:
         if r.status_code != 200:
             msg = "Could not connect to pcloud. Status: {s}, reason: {reason}.".format(s=r.status_code, reason=r.reason)
             logging.critical(msg)
-            raise SystemExit()
+            raise SystemExit(msg)
         # Status Code OK, so successful login
         res = r.json()
         self.auth = res["auth"]
-        folder = res["metadata"]["content"]
-        for item in folder:
-            if item["isfolder"]:
-                obj = "Folder"
-            else:
-                obj = "File"
-            print("Found {obj}: {name}".format(obj=obj, name=item["name"]))
+        items = res["metadata"]["contents"]
+        bu_dir = config_hdl["Pcloud"]["dir"]
+        for item in items:
+            if item["isfolder"] and item["name"] == bu_dir:
+                self.folderid = item["folderid"]
+                break
+        else:
+            msg = "Could not find Backup directory {bu_dir}".format(bu_dir=bu_dir)
+            logging.critical(msg)
+            raise SystemExit(msg)
+
+    def upload(self, filename, fc):
+        """
+        This method will upload a file.
+        :param filename: Filename
+        :param fc: Binary slurp of the file to load
+        :return:
+        """
+        params = dict(
+            auth=self.auth,
+            folderid=self.folderid,
+            fn=filename
+        )
+        method = "uploadfile"
 
     def logout(self):
         method = "logout"
         url = self.url_base + method
-        params =
+        params = dict(auth=self.auth)
+        r = requests.get(url, params=params)
+        if r.status_code != 200:
+            msg = "Could not logout from pcloud. Status: {s}, reason: {rsn}.".format(s=r.status_code, rsn=r.reason)
+            logging.error(msg)
+        else:
+            res = r.json()
+            if res["auth_deleted"]:
+                msg = "Logout as required"
+            else:
+                msg = "Logout not successful, status code: {status}".format(status=r.status_code)
+            logging.info(msg)
