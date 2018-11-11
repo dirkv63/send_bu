@@ -1,6 +1,7 @@
 """
 Script to mail databases as attachment. This is used as Database backup mechanism.
 Information from http://naelshiab.com/tutorial-send-email-python/
+Converted to script to send backups to pcloud.
 """
 
 
@@ -11,7 +12,7 @@ import platform
 import zipfile
 from lib import my_env
 from lib import info_layer
-from lib import ftp_handler
+from lib import pcloud_handler
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -20,7 +21,7 @@ cfg = my_env.init_env("sendmail", __file__)
 logging.info("Start application")
 computer_name = platform.node()
 sa = info_layer.SqlAlConn(cfg)
-ftp = ftp_handler.ftp_handler(cfg)
+pc = pcloud_handler.PcloudHandler(cfg)
 
 msg = MIMEMultipart()
 
@@ -31,6 +32,7 @@ else:
 dbs = cfg[file_list]
 files = []
 msg_arr = []
+zipdir = cfg["Main"]["zipdir"]
 for k in dbs:
     fileToSend = cfg[file_list][k]
     try:
@@ -38,18 +40,18 @@ for k in dbs:
             fc = fp.read()
             if sa.file_update(k, fc):
                 # zip file before sending
-                logging.debug(("Zip File {fn}".format(fn=fileToSend)))
+                zipfn = k + str(datetime.datetime.today().weekday())
+                zipffp = os.path.join(zipdir, zipfn)
                 (fp, fn) = os.path.split(fileToSend)
-                zipfn = "{fn}.zip".format(fn=fn.split(".")[0])
-                zipffp = os.path.join(fp, zipfn)
+                # Change Dir to file directory, otherwise zip includes full path to the file.
                 os.chdir(fp)
                 try:
-                    zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
+                    zipf = zipfile.ZipFile(zipffp, 'w', zipfile.ZIP_DEFLATED)
                     zipf.write(fn)
                     zipf.close()
                     files.append(k)
-                    # Send file to FTP Server
-                    res = ftp.load_file(zipfn, k + str(datetime.datetime.today().weekday()))
+                    # Send file to Cloud Server
+                    res = pc.upload(zipffp)
                 except PermissionError:
                     res = "Permission denied on {fn}".format(fn=fileToSend)
                     logging.error(res)
@@ -59,6 +61,7 @@ for k in dbs:
         logmsg = "Cannot find file {fts} for evaluation".format(fts=fileToSend)
         msg_arr.append(logmsg)
         logging.error(logmsg)
+pc.logout()
 
 if len(files) == 0:
     subject = "No Backup Files!"

@@ -1,4 +1,5 @@
 import logging
+import os
 import requests
 
 
@@ -24,7 +25,8 @@ class PcloudHandler:
         self.url_base = config_hdl["Pcloud"]["home"]
         method = "listfolder"
         url = self.url_base + method
-        r = requests.get(url, params=params)
+        self.session = requests.Session()
+        r = self.session.get(url, params=params)
         if r.status_code != 200:
             msg = "Could not connect to pcloud. Status: {s}, reason: {reason}.".format(s=r.status_code, reason=r.reason)
             logging.critical(msg)
@@ -43,25 +45,47 @@ class PcloudHandler:
             logging.critical(msg)
             raise SystemExit(msg)
 
-    def upload(self, filename, fc):
+    def upload(self, filepath):
         """
-        This method will upload a file.
-        :param filename: Filename
-        :param fc: Binary slurp of the file to load
+        This method will upload a file. Note that the Filename key value in the requests post array is of no value, the
+        filename is guessed from the fileobject body.
+        :param filepath: Full path for the file
         :return:
         """
+        print("Filepath: {fp}".format(fp=filepath))
         params = dict(
             auth=self.auth,
-            folderid=self.folderid,
-            fn=filename
+            folderid=self.folderid
         )
         method = "uploadfile"
+        url = self.url_base + method
+        with open(filepath, 'rb') as body:
+            files = {"dummyfilename": body}
+            r = self.session.post(url, files=files, data=params)
+            if r.status_code != 200:
+                msg = "Upload file not successful. Status: {s}, reason: {reason}.".format(s=r.status_code,
+                                                                                          reason=r.reason)
+                logging.error(msg)
+            else:
+                res = r.json()
+                flinfo = res["metadata"][0]
+                rem_size = flinfo["size"]
+                local_size = os.path.getsize(filepath)
+                if rem_size == local_size:
+                    msg = "Upload {fp} successful, {size} bytes transferred".format(size=flinfo["size"], fp=filepath)
+                    logging.info(msg)
+                else:
+                    msg = "Upload {fp} not complete, {lcl} bytes required, {rem} bytes received.".format(fp=filepath,
+                                                                                                         lcl=local_size,
+                                                                                                         rem=rem_size)
+                    logging.error(msg)
+        return msg
 
     def logout(self):
         method = "logout"
         url = self.url_base + method
         params = dict(auth=self.auth)
-        r = requests.get(url, params=params)
+        r = self.session.get(url, params=params)
         if r.status_code != 200:
             msg = "Could not logout from pcloud. Status: {s}, reason: {rsn}.".format(s=r.status_code, rsn=r.reason)
             logging.error(msg)
