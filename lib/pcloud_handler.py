@@ -72,12 +72,12 @@ class PcloudHandler:
                 rem_size = flinfo["size"]
                 local_size = os.path.getsize(filepath)
                 if rem_size == local_size:
-                    msg = "Upload {fp} successful, {size} bytes transferred".format(size=flinfo["size"], fp=filepath)
+                    msg = "Upload {fp} successful, {size:,} bytes transferred".format(size=flinfo["size"], fp=filepath)
                     logging.info(msg)
                 else:
-                    msg = "Upload {fp} not complete, {lcl} bytes required, {rem} bytes received.".format(fp=filepath,
-                                                                                                         lcl=local_size,
-                                                                                                         rem=rem_size)
+                    msg = "Upload {fp} not complete, " \
+                          "{lcl:,} bytes required, {rem:,} bytes received.".format(fp=filepath, lcl=local_size,
+                                                                                   rem=rem_size)
                     logging.error(msg)
         return msg
 
