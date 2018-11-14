@@ -63,8 +63,9 @@ class PcloudHandler:
             files = {"dummyfilename": body}
             r = self.session.post(url, files=files, data=params)
             if r.status_code != 200:
-                msg = "Upload file not successful. Status: {s}, reason: {reason}.".format(s=r.status_code,
-                                                                                          reason=r.reason)
+                msg = "Upload file {fp} not successful. Status: {s}, reason: {reason}.".format(s=r.status_code,
+                                                                                               reason=r.reason,
+                                                                                               fp=filepath)
                 logging.error(msg)
             else:
                 res = r.json()
@@ -72,7 +73,8 @@ class PcloudHandler:
                 rem_size = flinfo["size"]
                 local_size = os.path.getsize(filepath)
                 if rem_size == local_size:
-                    msg = "Upload {fp} successful, {size:,} bytes transferred".format(size=flinfo["size"], fp=filepath)
+                    msg = "Upload {fp} successful, {size:,} bytes transferred".format(size=flinfo["size"],
+                                                                                      fp=flinfo["name"])
                     logging.info(msg)
                 else:
                     msg = "Upload {fp} not complete, " \
