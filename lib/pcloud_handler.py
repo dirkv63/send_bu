@@ -52,7 +52,7 @@ class PcloudHandler:
         :param filepath: Full path for the file
         :return:
         """
-        print("Filepath: {fp}".format(fp=filepath))
+        logging.debug("Filepath: {fp}".format(fp=filepath))
         params = dict(
             auth=self.auth,
             folderid=self.folderid
