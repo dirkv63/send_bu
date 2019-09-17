@@ -43,9 +43,7 @@ class SqlAlConn:
         This method will check if the file is updated since last run.
 
         :param file_id: Unique identifier for the file, use filename.
-
         :param fc: Contents (slurp) of the file.
-
         :return: True if the file was updated, False if there is no change.
         """
         # Get the hash for the file
