@@ -20,7 +20,6 @@ class SqlAlConn:
         SqlAlchemy Session
 
         :param config:
-
         :param echo:
         """
         self.sess = init_session(config, echo)
@@ -31,7 +30,6 @@ class SqlAlConn:
         removing the file from the database, the file will be flagged for load on the next run.
 
         :param file_id: Unique identifier for the file, use filename.
-
         :return:
         """
         self.sess.query(FileHash).filter_by(file_id=file_id).delete()
@@ -128,9 +126,7 @@ def init_session(config, echo=False):
     This function configures the connection to the database and returns the session object.
 
     :param config:
-
     :param echo: True / False, depending if echo is required. Default: False
-
     :return: session object.
     """
     if my_env.is_prod(config):
