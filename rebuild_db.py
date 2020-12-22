@@ -1,3 +1,4 @@
+#!/opt/envs/sendmail/bin/python
 """
 This procedure will rebuild the sqlite sendmail database
 """

@@ -1,3 +1,4 @@
+#!/opt/envs/sendmail/bin/python
 """
 Script to mail databases as attachment. This is used as Database backup mechanism.
 Information from http://naelshiab.com/tutorial-send-email-python/
@@ -40,7 +41,7 @@ for k in dbs:
             fc = fp.read()
             if sa.file_update(k, fc):
                 # zip file before sending
-                zipfn = k + str(datetime.datetime.today().weekday())
+                zipfn = k + str(datetime.datetime.today().day)
                 zipffp = os.path.join(zipdir, zipfn)
                 (fp, fn) = os.path.split(fileToSend)
                 # Change Dir to file directory, otherwise zip includes full path to the file.
