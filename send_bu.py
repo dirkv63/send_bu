@@ -41,7 +41,7 @@ for k in dbs:
             fc = fp.read()
             if sa.file_update(k, fc):
                 # zip file before sending
-                zipfn = k + str(datetime.datetime.today().day)
+                zipfn = f"{k}.{str(datetime.datetime.today().day)}"
                 zipffp = os.path.join(zipdir, zipfn)
                 (fp, fn) = os.path.split(fileToSend)
                 # Change Dir to file directory, otherwise zip includes full path to the file.
